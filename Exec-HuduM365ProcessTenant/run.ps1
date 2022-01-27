@@ -815,7 +815,8 @@ try {
                 $DeviceIntuneDetailshtml = "<div><div>$DeviceLinksBlock<br /><div class=`"nasa__content`">$($DeviceOverviewBlock)$($DeviceHardwareBlock)$($DeviceEnrollmentBlock)$($DevicePolicyBlock)$($DeviceAppsBlock)$($DeviceGroupsBlock)</div></div>"
 
                 $DeviceAssetFields = @{
-                    microsoft_365 = $DeviceIntuneDetailshtml
+                    brand = $($Device.manufacturer)
+					microsoft_365 = $DeviceIntuneDetailshtml
                 }
 
                 if ($HuduDevice) {
