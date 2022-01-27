@@ -816,6 +816,7 @@ try {
 
                 $DeviceAssetFields = @{
                     brand = $($Device.manufacturer)
+					model = $($Device.model)
 					microsoft_365 = $DeviceIntuneDetailshtml
                 }
 
