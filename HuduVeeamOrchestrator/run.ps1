@@ -6,7 +6,7 @@ ForEach ($company in $companies) {
 
 $BaseURL = "https://api.checkcentral.cc/getChecks/?apiToken=c41529ece1b745a38bbedc71c3b34b74&checkId="
 $checkID = $company.checkID
-$ExtraURL = "&activityCount=10"
+$ExtraURL = "&activityCount=20"
 #$ActivityURL = "https://api.checkcentral.cc/getChecks/?apiToken=c41529ece1b745a38bbedc71c3b34b74&checkId=502ddbaa-396c-410b-8787-38da0256f901&activityCount=10"
 $ActivityURL = $BaseURL + $checkID + $ExtraURL
 $company_name = $company.company_name
