@@ -1,6 +1,15 @@
 param($Context)
-$ActivityURL = "https://api.checkcentral.cc/getChecks/?apiToken=c41529ece1b745a38bbedc71c3b34b74&checkId=502ddbaa-396c-410b-8787-38da0256f901&activityCount=10"
-$company_name = "Banning Engineering"
+
+$companies = Import-CSV clientchecks.csv
+
+ForEach ($company in $companies) {
+
+$BaseURL = "https://api.checkcentral.cc/getChecks/?apiToken=c41529ece1b745a38bbedc71c3b34b74&checkId="
+$checkID = $company.checkID
+$ExtraURL = "&activityCount=10"
+#$ActivityURL = "https://api.checkcentral.cc/getChecks/?apiToken=c41529ece1b745a38bbedc71c3b34b74&checkId=502ddbaa-396c-410b-8787-38da0256f901&activityCount=10"
+$ActivityURL = $BaseURL + $checkID + $ExtraURL
+$company_name = $company.company_name
 $LatestStatus = $null
 $HuduURL = "https://docs.structurepoint.com"
 $HuduAPI = "kkcfmyv5jtV3Hzsij1wc6TsC"
@@ -55,3 +64,5 @@ if ($LatestStatus -eq 'Success') {
 $MagicDash = Set-HuduMagicDash -title "Veeam Backup Status" -company_name $company_name -message $message -image_url "https://icon-library.com/images/veeam-icon/veeam-icon-9.jpg" -content $ActivityTable -shade $shadecolor
 
 $MagicDash = Set-HuduMagicDash -title "Veeam Backup Status" -company_name $company_name -message $message -image_url "https://icon-library.com/images/veeam-icon/veeam-icon-9.jpg" -content $ActivityTable -shade $shadecolor
+
+}
