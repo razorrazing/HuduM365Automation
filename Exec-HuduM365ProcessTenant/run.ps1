@@ -822,7 +822,7 @@ try {
                 }
 
                 if ($HuduDevice) {
-                    if (($HuduDevice | measure-object).count -gt 1) {                                  
+                    if (($HuduDevice | measure-object).count -eq 1) {                                  
                         $null = Set-HuduAsset -asset_id $HuduDevice.id -name $HuduDevice.name -company_id $company_id -asset_layout_id $HuduDevice.asset_layout_id -fields $DeviceAssetFields -PrimarySerial $Device.serialNumber
                     } else {
                         $CompanyResult.Errors.add("Device $($HuduDevice.name): Multiple devices matched on name or serial ($($device.serialNumber -join ', '))")
