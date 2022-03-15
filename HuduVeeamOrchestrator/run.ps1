@@ -15,9 +15,7 @@ $HuduURL = "https://docs.structurepoint.com"
 $HuduAPI = "kkcfmyv5jtV3Hzsij1wc6TsC"
 New-HuduBaseURL -BaseURL $HuduURL
 New-HuduAPIKey -ApiKey $HuduAPI
-#$BanningJSON = $BanningJobs | ConvertFrom-Json
 
-#$BanningParse = $BanningJSON.checks.activies
 
 
 
