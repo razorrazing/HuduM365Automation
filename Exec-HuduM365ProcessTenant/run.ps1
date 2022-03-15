@@ -14,15 +14,15 @@ $CompanyResult = [PSCustomObject]@{
 }
 
 $PeopleLayoutName = $env:PeopleLayoutName
-$CreateUsers = [bool]$env:CreateUsers
+$CreateUsers = [System.Convert]::ToBoolean($env:CreateUsers)
 $DesktopsName = $env:DesktopsName
 $MobilesName = $env:MobilesName
-$CreateDevices = [bool]$env:CreateDevices
-$CreateMobileDevices = [bool]$env:CreateMobileDevices
-$CreateInOverview = [bool] $env:CreateInOverview
+$CreateDevices = [System.Convert]::ToBoolean($env:CreateDevices)
+$CreateMobileDevices = [System.Convert]::ToBoolean($env:CreateMobileDevices)
+$CreateInOverview = [System.Convert]::ToBoolean($env:CreateInOverview)
 $OverviewCompany = $env:OverviewCompany
-$importDomains = [bool]$env:importDomains
-$monitorDomains = [bool]$env:monitorDomains
+$importDomains = [System.Convert]::ToBoolean($env:importDomains)
+$monitorDomains = [System.Convert]::ToBoolean($env:monitorDomains)
 $IntuneDesktopDeviceTypes = $env:IntuneDesktopDeviceTypes -split ','
 $ExcludeSerials = $env:ExcludeSerials -split ','
 $LicenseLookup = Get-LicenseLookup
@@ -31,7 +31,7 @@ $AssignedNameMap = Get-AssignedNameMap
 $PSAUserURL = $env:PSAUserURL
 $RMMDeviceURL = $env:RMMDeviceURL
 $RMMRemoteURL = $env:RMMRemoteURL
-$EnableCIPP = [bool]$env:EnableCIPP
+$EnableCIPP = [System.Convert]::ToBoolean($env:EnableCIPP)
 $CIPPURL = $env:CIPPURL
 
 try {
@@ -43,9 +43,16 @@ try {
 
         $company_name = $hududomain[0].company_name
         $company_id = $hududomain[0].company_id
-    
+        $ExchangeAuthenticated = $true
+
         try {
             $ExchangeAuthHeaders = Get-GraphToken -AppID 'a0c73c16-a7e3-4564-9a95-2bdf47383716' -RefreshToken $env:ExchangeRefreshToken -Scope 'https://outlook.office365.com/.default' -Tenantid $TenantFilter
+        } catch {
+            $CompanyResult.Errors.Add("Failed to get Exchange Auth Headers")
+            $ExchangeAuthenticated = $false
+        }
+
+        try{
             $Authheaders = Get-GraphToken -tenantid $TenantFilter
         } catch {
             Throw "Failed to authenticate to tenant"
@@ -378,26 +385,39 @@ try {
             $OneDriveDetails = $null
         }
 
-        try {
-            $CASFull = New-GraphGetRequest -Headers $ExchangeAuthHeaders -uri "https://outlook.office365.com/adminapi/beta/$($tenantfilter)/CasMailbox" -Tenantid $tenantfilter -scope ExchangeOnline -noPagination $true
-        } catch {
-            $CompanyResult.Errors.add("Company: Unable to fetch CAS Mailbox Details $_")
+        if ($ExchangeAuthenticated) {
+            try {
+                $CASFull = New-GraphGetRequest -Headers $ExchangeAuthHeaders -uri "https://outlook.office365.com/adminapi/beta/$($tenantfilter)/CasMailbox" -Tenantid $tenantfilter -scope ExchangeOnline -noPagination $true
+            } catch {
+                $CASFull = $null
+                $CompanyResult.Errors.add("Company: Unable to fetch CAS Mailbox Details $_")
+            }
+        } else {
             $CASFull = $null
         }
-            
-        try {
-            $MailboxDetailedFull = New-ExoRequest -TenantID $TenantFilter -cmdlet 'Get-Mailbox'
-        } catch {
-            $CompanyResult.Errors.add("Company: Unable to fetch Mailbox Details $_")
+        
+        if ($ExchangeAuthenticated) {
+            try {
+                $MailboxDetailedFull = New-ExoRequest -TenantID $TenantFilter -cmdlet 'Get-Mailbox'
+            } catch {
+                $CompanyResult.Errors.add("Company: Unable to fetch Mailbox Details $_")
+                $MailboxDetailedFull = $null
+            }
+        } else {
             $MailboxDetailedFull = $null
         }
 
-        try {
-            $MailboxStatsFull = New-GraphGetRequest -Headers $AuthHeaders -uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageDetail(period='D7')" -tenantid $TenantFilter | convertfrom-csv 
-        } catch {
-            $CompanyResult.Errors.add("Company: Unable to fetch Mailbox Statistic Details $_")
+        if ($ExchangeAuthenticated) {
+            try {
+                $MailboxStatsFull = New-GraphGetRequest -Headers $AuthHeaders -uri "https://graph.microsoft.com/v1.0/reports/getMailboxUsageDetail(period='D7')" -tenantid $TenantFilter | convertfrom-csv 
+            } catch {
+                $CompanyResult.Errors.add("Company: Unable to fetch Mailbox Statistic Details $_")
+                $MailboxStatsFull = $null
+            }
+        } else {
             $MailboxStatsFull = $null
         }
+
 
         if ($licensedUsers) {
             $pre = "<div class=`"nasa__block`"><header class='nasa__block-header'>
@@ -440,9 +460,13 @@ try {
                     $MailboxDetailedRequest = $MailboxDetailedFull | where-object { $_.ExternalDirectoryObjectId -eq $User.iD }
                     $StatsRequest = $MailboxStatsFull | where-object { $_.'User Principal Name' -eq $User.UserPrincipalName }
 
-                    try {
-                        $PermsRequest = New-GraphGetRequest -Headers $ExchangeAuthHeaders -uri "https://outlook.office365.com/adminapi/beta/$($tenantfilter)/Mailbox('$($User.ID)')/MailboxPermission" -Tenantid $tenantfilter -scope ExchangeOnline -noPagination $true
-                    } catch {
+                    if ($ExchangeAuthenticated) {
+                        try {
+                            $PermsRequest = New-GraphGetRequest -Headers $ExchangeAuthHeaders -uri "https://outlook.office365.com/adminapi/beta/$($tenantfilter)/Mailbox('$($User.ID)')/MailboxPermission" -Tenantid $tenantfilter -scope ExchangeOnline -noPagination $true
+                        } catch {
+                            $PermsRequest = $null
+                        }
+                    } else {
                         $PermsRequest = $null
                     }
 
