@@ -1,9 +1,16 @@
-
 ### Hudu M365 Automation
 This is an Azure Function which will syncronise between Microsoft 365 and Hudu. For more details please see my blog post here: https://mspp.io/hudu-microsoft-365-integration-and-updated-magic-dash-v3/
 
 ### Copyright
 This project utilizes some of the helper functions and approaches written by Kelvin Tegelaar from the CIPP project https://github.com/KelvinTegelaar/CIPP and is licensed under the same terms.
+
+
+### Updates
+#### Version 1.1
+```
+Added error handling for tokens
+Added automatic token refresh
+```
 
 ### Requirements
 For this script you will need
@@ -40,7 +47,7 @@ If you wish to customise the code you can fork this repository and then deploy t
 #### Core Settings
 | Setting Name | Description |
 |--|--|
-|baseName| Name use as base-template to named the resources deployed in Azure.|
+|baseName| Name use as base-template to name the resources deployed in Azure.|
 |PeopleLayoutName|The name of the Asset Layout in Hudu used to track People / Users. (Must exist already with a richtext Microsoft 365 field)|
 |DesktopsName|The name of the Asset Layout in Hudu used to track Desktops / Laptops. (Must exist already with a richtext Microsoft 365 field)|
 |MobilesName|The name of the Asset Layout in Hudu used to track Mobile Devices. (Must exist already with a richtext Microsoft 365 field)|
